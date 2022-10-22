@@ -1,0 +1,122 @@
+.data
+
+msgin: .asciz "Inserisci un carattere: "
+msgout1: .asciz "\nIntero relativo (ASCII): "
+msgout2: .asciz "\nBinario relativo (ASCII): "
+msgout3: .asciz "\nEsadecimale relativo (ASCII): "
+strbin: .space 32
+strexa: .space 8
+
+.text
+.globl main
+
+main:
+
+la a0,msgin
+li a7,4
+ecall
+
+li a7,12
+ecall
+
+mv s0,a0	#carattere letto da tastiera
+
+la a0,msgout1
+li a7,4
+ecall
+
+mv a0,s0
+li a7,1
+ecall		#stampa come intero
+
+mv a1,s0
+la a2,strbin
+jal binarioConv
+
+la a0,msgout2
+li a7,4
+ecall
+
+la a0,strbin
+li a7,4
+ecall
+
+mv a1,s0
+la a2,strexa
+jal exaConv
+
+la a0,msgout3
+li a7,4
+ecall
+
+la a0,strexa
+li a7,4
+ecall
+
+li a7,10
+ecall
+
+binarioConv:
+li t0,48	#'0'
+li t1,49	#'1'
+li t2,0x80000000#maschera con MSB alto
+li t3,0
+
+conv_loop:
+beqz t2,exit
+
+add t4,a2,t3
+
+and t5,a1,t2
+
+beqz t5,set_zero
+b set_uno
+
+set_zero:
+sb t0,(t4)
+addi t3,t3,1
+srli t2,t2,1
+b conv_loop
+
+set_uno:
+sb t1,(t4)
+addi t3,t3,1
+srli t2,t2,1
+b conv_loop
+
+exit:
+jr ra
+
+exaConv:
+
+li t0,0
+li t1,0xF0000000
+li t2,28
+li t4,9
+
+exa_loop:
+beqz t1,exit
+
+add t5,a2,t0
+and t3,a1,t1
+srl t3,t3,t2
+
+bgt t3,t4,char_case
+
+addi t3,t3,48
+
+sb t3,(t5)
+
+addi t0,t0,1
+addi t2,t2,-4
+srli t1,t1,4
+b exa_loop
+
+char_case:
+addi t3,t3,55
+
+sb t3,(t5)
+addi t0,t0,1
+addi t2,t2,-4
+srli t1,t1,4
+b exa_loop

@@ -1,0 +1,134 @@
+.data
+msgin: .asciz "Inserisci una stringa in binario(0/1) di massimo 32 caratteri:  "
+msgInt: .asciz "\n Intero corrispondente: "
+msgExa: .asciz "\n Esadecimale corrispondente: "
+str_exa: .space 8
+
+.text
+.globl main
+
+main:
+addi sp,sp,-33
+
+la a0,msgin
+li a7,4
+ecall
+
+mv a0,sp
+li a1,33
+li a7,8
+ecall
+
+mv a1,sp
+jal strlen
+
+
+mv a1,sp
+jal bin_int
+
+la a0,msgInt
+li a7,4
+ecall
+
+mv a0,a3
+li a7,1
+ecall
+
+mv a1,a3
+la a2,str_exa
+jal int_exa
+
+la a0,msgExa
+li a7,4
+ecall
+
+la a0,str_exa
+li a7,4
+ecall
+
+li a7,10
+ecall
+
+strlen:
+li a2,0
+li t0,0
+li t4,'\n'
+
+len_loop:
+add t1,a1,t0
+lbu t3,(t1)
+
+beqz t3,exit_len
+beq t3,t4,exit_len
+
+addi a2,a2,1
+addi t0,t0,1
+b len_loop
+
+exit_len:
+addi a2,a2,-1
+jr ra
+
+bin_int:
+li a3,0		#@return 
+mv t0,a2
+li t1,'\n'
+li t2,0x1
+li t5,49
+
+bin_int_loop:
+add t3,a1,t0
+lbu t4,(t3)
+
+beq t4,t1,exit
+beqz t4,exit
+beq t4,t5,uno
+
+addi t0,t0,-1
+slli t2,t2,1
+b bin_int_loop
+
+uno:
+add a3,a3,t2
+
+addi t0,t0,-1
+slli t2,t2,1
+b bin_int_loop
+
+exit:
+jr ra
+
+int_exa: #a1 intero, a2 memoria dove scrivere
+li t0,0xF0000000
+li t1,0
+li t2,9
+li t3,28
+
+int_exa_loop:
+beqz t0,exit_exa
+add t5,a2,t1
+
+and t4,a1,t0
+srl t4,t4,t3
+
+bgt t4,t2,char
+
+addi t4,t4,48
+sb t4,(t5)
+
+addi t1,t1,1
+addi t3,t3,-4
+srli t0,t0,4
+b int_exa_loop
+
+char:
+addi t4,t4,55
+sb t4,(t5)
+addi t1,t1,1
+addi t3,t3,-4
+srli t0,t0,4
+b int_exa_loop
+
+exit_exa:
+jr ra
+ 

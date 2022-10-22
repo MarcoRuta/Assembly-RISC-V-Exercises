@@ -1,0 +1,86 @@
+.data
+msgin: .asciz "Inserisci una stringa in esadecimale di massimo 20 caratteri (caratteri accetatti A-F/a-f/1-9): "
+msgout: .asciz "\nQuesta è la somma dei caratteri che hai inserito: "
+err: .asciz "\nUno dei caratteri che hai inserito non era valido!\n"
+.text
+.globl main
+
+main:
+addi sp,sp,-20
+
+start:
+
+la a0,msgin
+li a7,4
+ecall
+
+mv a0,sp
+li a1,20
+li a7,8
+ecall
+
+mv a2,sp
+jal somma_exa
+
+la a0,msgout
+li a7,4
+ecall
+
+mv a0,a4
+li a7,1
+ecall
+
+addi sp,sp,20
+
+li a7,10
+ecall
+
+somma_exa:
+li t0,0
+li t1,'\n'
+li t4,57
+
+loop:
+add t2,a2,t0
+lbu t3,(t2)
+
+beqz t3,exit
+beq t3,t1,exit
+
+bgt t3,t4,char
+
+addi t3,t3,-48
+add a4,a4,t3
+addi t0,t0,1
+b loop
+
+char:
+li t5,65
+blt t3,t5,input_error
+li t5,122
+bgt t3,t5,input_error
+li t5,70
+bgt t3,t5,lower_case
+
+addi t3,t3,-55
+add a4,a4,t3
+addi t0,t0,1
+b loop
+
+lower_case:
+li t5,102
+bgt t3,t5,input_error
+
+addi t3,t3,-82
+add a4,a4,t3
+addi t0,t0,1
+b loop
+
+input_error:
+la a0,err
+li a7,4
+ecall
+b start
+
+exit:
+jr ra

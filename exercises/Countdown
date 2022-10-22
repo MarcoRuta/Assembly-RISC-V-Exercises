@@ -1,0 +1,78 @@
+.data
+msgin: .asciz "Inserisci un intero: "
+msgout: .asciz "\nEcco il conto alla rovescia fino a 0 in binario!\n"
+new_line: .asciz "\n"
+strbin: .space 32
+
+.text
+.globl main
+
+main:
+
+la a0,msgin
+li a7,4
+ecall		#stampa messaggio di input
+
+li a7,5
+ecall		#lettura intero
+
+mv s0,a0	#salvo l'intero in s0
+
+la a0,msgout
+li a7,4
+ecall
+
+mv a1,s0	#a1 intero da cui partire
+la a2,strbin	#a2 stringa dove salvare
+
+jal countdown
+
+li a7,10
+ecall		#fine del programma
+
+
+		#procedura countdown, riceve un intero e partendo da questo stampa in ordine decrescente (fino a 0) stringhe in binario.
+		#@parametri: a1 numero da cui partire, a2 aria di memoria dove salvare la stringa
+countdown:
+li t0,'0'
+li t1,'1'	
+li t2,0x80000000	#maschera con solo il bit MSB alto
+beqz a1,exit		#se sono arrivato a 0 esco	
+
+li t3,0
+loop:
+beqz t2,print		#ogni volta che la maschera finisce ho settato tutti e 32 i bit della stringa e vado a stamparla
+
+add t4,a2,t3		#indirizzo del byte t3-esimo della stringa
+
+and t5,a1,t2		#isolo un bit per volta
+
+beqz t5,set_zero	#se il bit è zero salto a set_zero
+	
+sb t1,(t4)		#sennò in quella posizione stalvo il carattere 1 (49 Ascii)
+
+addi t3,t3,1		#incremento contatore per indirizzo stringa
+srli t2,t2,1		#shift della maschera di 1 bit verso dx
+b loop
+
+set_zero:
+sb t0,(t4)
+
+addi t3,t3,1		#incremento contatore per indirizzo stringa
+srli t2,t2,1		#shift della maschera di 1 bit verso dx
+b loop
+
+print:
+la a0,strbin
+li a7,4
+ecall
+
+la a0,new_line
+li a7,4
+ecall
+
+addi a1,a1,-1
+b countdown
+
+exit:
+jr ra

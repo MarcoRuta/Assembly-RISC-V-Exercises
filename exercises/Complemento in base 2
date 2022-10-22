@@ -1,0 +1,38 @@
+.data
+msgin: .asciz "Inserisci un intero: "
+msgout: .asciz "il complemento in base 2 è: "
+
+.text
+.globl main
+
+main:
+la a0,msgin
+li a7,4
+ecall
+
+li a7,5
+ecall
+
+mv s0,a0
+
+mv a1,s0
+jal inverti
+
+
+
+la a0,msgout
+li a7,4
+ecall
+
+mv a0,a2
+li a7,1
+ecall
+
+li a7,10
+ecall
+
+inverti:
+li t0,0xFFFFFFFF
+xor a2,a1,t0
+addi a2,a2,1
+jr ra

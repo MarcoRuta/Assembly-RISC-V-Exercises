@@ -1,0 +1,96 @@
+.data
+
+msgin: .asciz "Inserisci un testo in formato libero (massimo 200 caratteri a scelta): "
+msgout: .asciz "\nHai inserito "
+pari: .asciz " parole pari!"
+dispari: .asciz " parole dispari!"
+
+.text
+.globl main
+
+main:
+addi sp,sp,-200		#libero 200 byte in stack per il testo
+
+la a0,msgin
+li a7,4	
+ecall			#stampa messaggio di input
+
+mv a0,sp
+li a1,200
+li a7,8
+ecall			#lettura testo
+
+mv a2,sp
+jal conta_parole	#salto alla procedura conta parole
+
+la a0,msgout
+li a7,4
+ecall
+
+mv a0,a3
+li a7,1
+ecall
+
+la a0,pari
+li a7,4
+ecall			#stampa numero parole pari
+
+la a0,msgout
+li a7,4
+ecall
+
+mv a0,a4
+li a7,1
+ecall			#stampa numero parole dispari
+
+la a0,dispari
+li a7,4
+ecall				
+
+li a7,10
+ecall			#fine
+
+##################################
+	
+		#@param a2 Stack Pointer, dov'è salvato il testo
+		#@return a3 numero di parole pari, a4 numero di parole dispari
+conta_parole:		
+li a3,0
+li a4,0
+li t0,0		#contatore per muoversi sul testo
+li t1,'\n'
+li t2,32	#Codice ascii del carattere ' '
+
+new_parola:
+li t5,0		#contatore lunghezza  dell'attuale parola
+
+parola_loop:
+add t3,a2,t0
+lbu t4,(t3)	#carico il carattere t0-esimo della stringa
+beqz t4,fine_parola
+beq t4,t1,fine_parola	
+beq t4,t2,fine_parola	#se trovo spazio, new line o terminatore vuol dire che è finita la parola e va valutata la sua lunghezza
+addi t0,t0,1	#incremento contatore sul testo
+addi t5,t5,1	#incremento lunghezza attuale parola
+b parola_loop
+
+fine_parola:
+andi t5,t5,0x1	#isolo il LSB della lunghezza della parola
+beqz t5,par	#se è zero salto alla label pari
+addi a4,a4,1	#sennò incremento il contatore dei dispari
+beqz t4,end
+beq t4,t1,end	#se la parola termina con terminatore o new_line vuol dire che sono arrivato alla fine del testo
+addi t0,t0,1
+b new_parola	#salto alla prossima parola
+
+par:
+addi a3,a3,1	#incremento contatore dei pari
+beqz t4,end
+beq t4,t1,end	#se la parola termina con terminatore o new_line vuol dire che sono arrivato alla fine del testo
+addi t0,t0,1
+b new_parola	#salto alla prossima parola
+
+end:
+jr ra
+
+##################################

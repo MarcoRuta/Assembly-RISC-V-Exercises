@@ -1,0 +1,131 @@
+.data
+
+inputstr: .asciz "\nInserisci una stringa di massimo 20 caratteri: "
+outputmax: .asciz "\nEcco la stringa più lunga che hai inserito: "
+outputmin: .asciz "\nEcco la stringa più corta che hai inserito: "
+
+.text
+.globl main
+
+main:
+addi sp,sp,-100		#spazio per 5 stringhe da 20 caratteri
+li s0,100		#limite stack
+
+
+mv a2,s0
+jal input
+
+
+jal str_max_min
+
+
+la a0,outputmax
+li a7,4
+ecall
+
+mv a0,a5
+li a7,4
+ecall
+
+la a0,outputmin
+li a7,4
+ecall
+
+mv a0,a4
+li a7,4
+ecall
+
+addi sp,sp,100
+
+li a7,10
+ecall
+
+
+
+input:
+li t0,0
+
+input_loop:
+beq t0,a2,exit_input
+
+add t1,sp,t0
+
+la a0,inputstr
+li a7,4
+ecall
+
+mv a0,t1
+li a1,20
+li a7,8
+ecall
+
+addi t0,t0,20
+b input_loop
+
+exit_input:
+jr ra
+
+str_max_min:
+addi sp,sp,-4
+sw ra,(sp)
+li t1,104
+li t0,4
+
+add a2,sp,t0
+jal strlen
+
+mv a4,a2	#indirizzo stringa più corta
+mv a5,a2	#indirizzo stringa più lunga
+mv a6,a3	#lunghezza stringa più corta
+mv a7,a3	#lunghezza stringa più lunga
+
+addi t0,t0,20
+
+max_min_loop:
+beq t0,t1,exit_max_min
+
+add a2,sp,t0
+jal strlen	#in a3 mi restituisce lunghezza della stringa di indirizzo contenuto in a2
+
+bgt a3,a7,new_max
+blt a3,a6,new_min
+
+addi t0,t0,20
+b max_min_loop
+
+new_max:
+mv a5,a2
+mv a7,a3
+addi t0,t0,20
+b max_min_loop
+
+new_min:
+mv a4,a2
+mv a6,a3
+addi t0,t0,20
+b max_min_loop
+
+exit_max_min:
+lw ra,(sp)
+addi sp,sp,4
+jr ra
+
+strlen:		#riceve in a2 indirizzo stringa, in a3 deve restituire la lunghezza
+li t2,0
+li a3,0
+li t3,'\n'
+
+len_loop:
+add t4,a2,t2
+lbu t5,(t4)
+
+beqz t5,exit_len
+beq t5,t3,exit_len
+
+addi a3,a3,1
+addi t2,t2,1
+
+b len_loop
+
+exit_len:
+jr ra

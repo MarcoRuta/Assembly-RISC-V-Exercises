@@ -1,0 +1,53 @@
+.data
+
+msgin: .asciz "Inserisci una stringa: "
+msgout: .asciz "Stampa ordinata delle stringhe che hai inserito: "
+
+.text
+.globl main
+
+main:
+addi sp,sp,-100		#spazio per 5 stringhe da 20 char 
+
+mv a2,sp
+jal input
+
+
+mv a2,sp
+jal ordina
+
+
+li a7,10
+ecall
+
+	#procedura ordina, procedura non foglia
+	#@parametri: a2 stack pointer
+ordina:
+addi sp,sp,-4
+sw ra,(sp)	#salvo il return address in stack dato che verrà sporcato da str_cmp
+
+
+
+input:
+li t0,0
+li t1,100
+
+input_loop:
+beq t0,t1,exit1
+
+add t2,a2,t0		#indirizzo dove salvare la stringa
+
+la a0,msgin
+li a7,4
+ecall
+
+mv a0,t2
+li a1,20
+li a7,8
+ecall
+
+addi t0,t0,20
+b input_loop
+
+exit1:
+jr ra

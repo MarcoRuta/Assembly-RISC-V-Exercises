@@ -1,0 +1,99 @@
+.data
+msgin: .asciz "\nInserisci un testo (massimo 200 caratteri): "
+msgout: .asciz "\nEcco le consonanti doppie che ho trovato: "
+
+.text
+.globl main
+
+main:
+
+addi sp,sp,-200		#spazio per 200 caratteri
+li s0,200		#limite stack
+
+la a0,msgin
+li a7,4
+ecall
+
+mv a0,sp
+li a1,200
+li a7,8
+ecall			#lettura del testo
+
+la a0,msgout
+li a7,4
+ecall
+
+mv a1,sp
+mv a2,s0
+li a3,'\n'
+jal stampa_consonanti_doppie
+
+li a7,10
+ecall			#end
+
+
+stampa_consonanti_doppie:
+li t0,0
+li t1,1
+
+stampa_consonanti_loop:
+add t2,a1,t0	#indirizzo char n-esimo
+add t3,a1,t1	#indirizzo char n+1-esimo
+
+lbu t4,(t2)	#char n-esimo
+lbu t5,(t3)	#char n+1-esimo
+
+beqz t5,exit1
+beq t5,a3,exit1 #se trovo terminatore o new line è finito il testo e esco
+
+beq t4,t5,maybe_double	#se sono uguali vado a vedere se si tratta di una consonante
+
+next_chars:
+addi t0,t0,1
+addi t1,t1,1	#passo ai prossimi due char
+b stampa_consonanti_loop
+
+
+maybe_double:
+li t6,65		#A
+beq t4,t6,next_chars
+li t6,97		#a
+beq t4,t6,next_chars
+
+li t6,69		#E
+beq t4,t6,next_chars
+li t6,101		#e
+beq t4,t6,next_chars
+
+li t6,73		#I
+beq t4,t6,next_chars
+li t6,105		#i
+beq t4,t6,next_chars
+
+li t6,79		#O
+beq t4,t6,next_chars
+li t6,111		#o
+beq t4,t6,next_chars
+
+li t6,85		#U
+beq t4,t6,next_chars
+li t6,117		#u
+beq t4,t6,next_chars
+
+mv a0,t4
+li a7,11
+ecall		#stampo il carattere
+
+li a0,44
+li a7,11
+ecall		#stampo una virgola
+
+li a0,32
+li a7,11
+ecall		#stampo uno spazio vuoto
+
+b next_chars
+
+exit1:
+jr ra
+

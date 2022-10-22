@@ -1,0 +1,78 @@
+.data
+msgin: .asciz "Inserisci un elemento dell'array: "
+msgin2: .asciz "\nIn quale posizione vuoi accedere [0-9] (10 per terminare!): "
+msgout: .asciz "\nNella posizione selezionata è presente l'intero: "
+array: .data 10
+.text
+.globl main
+
+main:
+
+la a2,array	
+jal input	#salto alla funzione di input
+
+loop:
+
+la a0,msgin2
+li a7,4
+ecall
+
+li a7,5
+ecall		#leggo l'indice al quale si vuole accedere
+
+li t0,10
+beq a0,t0,exit
+
+mv s0,a0	#sposto l'intero letto in un registro Saved
+
+la a2,array
+mv a3,s0
+jal ArrayGet
+
+la a0,msgout
+li a7,4
+ecall
+
+mv a0,a4
+li a7,1
+ecall		#stampa del return della funzione Arrayget
+
+b loop		#torno a chiedere la posizione alla quale si vuole accedere
+
+exit:
+li a7,10
+ecall		#fine del programma
+
+#########################
+input:		#@parametri a2 indirizzo di memoria dove salvare gli interi 
+li t0,0
+li t1,10
+
+input_loop:
+beq t0,t1,exit1
+
+add t2,a2,t0	#calcolo indirizzo dove salvare prossimo intero
+
+la a0,msgin 
+li a7,4
+ecall
+
+li a7,5
+ecall		#lettura intero
+
+sb a0,(t2)	#salvataggio intero
+
+addi t0,t0,1	#passo alla prossima locazione di memoria
+b input_loop
+
+exit1:
+jr ra
+#########################
+ArrayGet:	#@parametri a2 indirizzo di memoria dove è contenuto il primo elemento dell'array, a3 l'indice della posizione in cui accedere
+li a4,0		#@return a4 l'intero presente nella posizione a3-esima
+
+add t0,a2,a3
+lb a4,(t0)
+
+jr ra
+#########################

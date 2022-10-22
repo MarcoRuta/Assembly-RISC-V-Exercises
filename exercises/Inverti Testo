@@ -1,0 +1,81 @@
+.data
+
+msgin: .asciz "Inserisci un testo (massimo 200 caratteri): "
+msgout:.asciz "Ecco il testo ivertito: "
+
+.text
+.globl main
+
+main:
+addi sp,sp,-200
+
+
+la a0,msgin
+li a7,4
+ecall
+
+mv a0,sp
+li a1,200
+li a7,8
+ecall
+
+mv a1,sp
+jal strlen
+mv s1,a3
+
+
+mv a1,sp
+mv a2,s1
+jal inverti_testo
+
+mv a0,sp
+li a7,4
+ecall
+
+addi sp,sp,200
+
+li a7,10
+ecall
+
+strlen:
+li t0,'\n'
+li t1,0
+li a3,0
+
+len_loop:
+add t2,a1,t1
+lbu t3,(t2)
+
+beqz t3,exit_len
+beq t3,t0,exit_len
+
+addi t1,t1,1
+addi a3,a3,1
+b len_loop
+
+exit_len:
+addi a3,a3,-1
+jr ra
+
+inverti_testo:
+li t0,0
+mv t1,a2
+
+inverti_loop:
+bge t0,t1,exit_inverti
+
+add t2,a1,t0
+add t3,a1,t1
+
+lbu t4,(t2)
+lbu t5,(t3)
+
+sb t5,(t2)
+sb t4,(t3)
+
+addi t0,t0,1
+addi t1,t1,-1
+b inverti_loop
+
+exit_inverti: 
+jr ra

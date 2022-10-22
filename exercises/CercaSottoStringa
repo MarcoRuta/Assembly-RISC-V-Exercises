@@ -1,0 +1,105 @@
+.data
+msgin1: .asciz "Inserisci un testo di massimo 200 caratteri: "
+msgin2: .asciz "Inserisci la stringa da cercare nel testo massimo 20 caratteri: "
+msgout1: .asciz "La stringa è stata trovata: "
+msgout2: .asciz " volte!"
+msoguterr: .asciz "La stringa non è stata trovata!"
+
+str: .space 20 
+.text
+.globl main
+
+
+main:
+addi sp,sp,-200		#spazio in stack per il testo, 200 Bytes
+
+la a0,msgin1
+li a7,4
+ecall			#Syscall stampa stringa msgin1
+
+mv a0,sp
+li a1,200
+li a7,8			#Syscall lettura del testo e salvataggio in stack
+ecall
+
+la a0,msgin2
+li a7,4
+ecall			#Syscall stampa stringa msgin1
+
+la a0,str
+li a1,20
+li a7,8
+ecall			#Syscall lettura del testo e salvataggio in memoria 
+
+mv a1,sp
+la a2,str
+jal cerca_occorrenze	#@retrun numero occorrenze a3
+
+la a0,msgout1
+li a7,4
+ecall			#Syscall stampa msgout2	
+
+mv a0,a3
+li a7,1
+ecall			#Syscall stampa Intero	
+
+la a0,msgout2
+li a7,4
+ecall			#Syscall stampa msgout2	
+
+addi sp,sp,200
+
+li a7,10
+ecall			#Syscall end
+
+
+
+cerca_occorrenze:			#@param a1 stack pointer, dove è salvata la testa del testo su cui cercare
+li a3,0					#@param a2 indirizzo memoria dove è contenuta la testa della stringa da cercare
+li t0,0  				#@return a3 il numero di occorrenze della stringa cercata nel testo
+li t6,'\n' 				
+
+cerca:
+li t1,0
+add t2,a1,t0
+add t3,a2,t1
+
+lbu t4,(t2)
+lbu t5,(t3)
+
+beq t4,t6,exit
+beqz t4,exit
+
+beq t4,t5,first_char			#se trovo le iniziali che combaciano salto alla label first_char
+addi t0,t0,1
+b cerca
+
+exit:
+jr ra
+
+first_char:
+addi t0,t0,1
+addi t1,t1,1
+
+cerca_loop:
+add t2,a1,t0
+add t3,a2,t1
+
+lbu t4,(t2)
+lbu t5,(t3)
+
+beq t5,t6,found
+beqz t5,found
+
+bne t4,t5,not_found
+
+addi t0,t0,1
+addi t1,t1,1
+b cerca_loop
+
+found:
+addi a3,a3,1
+b cerca
+
+not_found:
+b cerca

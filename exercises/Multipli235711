@@ -1,0 +1,139 @@
+.data
+array: .space 10
+
+msgin: .asciz "Inserisci un intero: "
+msgout2: .asciz "\nMultipli di 2: " 
+msgout3: .asciz "\nMultipli di 3: " 
+msgout5: .asciz "\nMultipli di 5: " 
+msgout7: .asciz "\nMultipli di 7: " 
+msgout11: .asciz "\nMultipli di 11: " 
+
+.text
+.globl main
+
+main:
+
+la a1,array
+jal input
+
+la a1,array
+jal conta_multipli
+
+la a0,msgout2
+li a7,4
+ecall
+
+mv a0,a2
+li a7,1
+ecall
+
+la a0,msgout3
+li a7,4
+ecall
+
+mv a0,a3
+li a7,1
+ecall
+
+la a0,msgout5
+li a7,4
+ecall
+
+mv a0,a4
+li a7,1
+ecall
+
+la a0,msgout7
+li a7,4
+ecall
+
+mv a0,a5
+li a7,1
+ecall
+
+la a0,msgout11
+li a7,4
+ecall
+
+mv a0,a6
+li a7,1
+ecall
+
+li a7,10
+ecall
+
+
+conta_multipli:
+li a2,0 #multipli 2
+li a3,0	#multipli 3
+li a4,0 #multipli 5
+li a5,0 #multipli 7
+li a6,0	#multipli 11
+li t0,0
+li t6,10
+
+multipli_loop:
+beq t0,t6,exit
+add t1,a1,t0
+
+lb t2,(t1)
+
+due:
+li t3,2
+rem t4,t2,t3
+bnez t4,tre
+addi a2,a2,1
+
+tre:
+li t3,3
+rem t4,t2,t3
+bnez t4,cinque
+addi a3,a3,1
+
+cinque:
+li t3,5
+rem t4,t2,t3
+bnez t4,sette
+addi a4,a4,1
+
+sette:
+li t3,7
+rem t4,t2,t3
+bnez t4,undici
+addi a5,a5,1
+
+undici:
+li t3,11
+rem t4,t2,t3
+bnez t4,next_int
+addi a6,a6,1
+
+next_int:
+addi t0,t0,1
+b multipli_loop
+
+
+input:
+li t0,0
+li t6,10
+
+input_loop:
+beq t0,t6,exit
+
+add t1,a1,t0
+
+la a0,msgin
+li a7,4
+ecall
+
+
+li a7,5
+ecall
+
+sb a0,(t1)
+
+addi t0,t0,1
+b input_loop
+
+exit:
+jr ra

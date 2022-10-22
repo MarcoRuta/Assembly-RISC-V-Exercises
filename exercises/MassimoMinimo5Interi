@@ -1,0 +1,93 @@
+.data
+msgin: .asciz "Inserisci un intero: "
+msgoutMax: .asciz "\nEcco il massimo: "
+msgoutMin: .asciz "\nEcco il minimo: "
+
+
+.text
+.globl main
+
+main:
+
+addi sp,sp,-20	#creo spazio per 5 interi
+
+mv a1,sp
+li a2,20
+jal riempi_array
+
+mv a1,sp
+li a2,20
+jal cerca_max_min
+  
+la a0,msgoutMax
+li a7,4
+ecall
+
+mv a0,a3
+li a7,1
+ecall
+
+la a0,msgoutMin
+li a7,4
+ecall
+
+mv a0,a4
+li a7,1
+ecall
+
+li a7,10 
+ecall
+    
+riempi_array:
+li t0,0
+
+riempi_loop:
+beq t0,a2,exit_riempi_array
+add t1,a1,t0
+
+la a0,msgin
+li a7,4
+ecall
+
+li a7,5
+ecall
+
+sb a0,(t1)
+addi t0,t0,4
+b riempi_loop
+
+exit_riempi_array:
+jr ra 
+
+
+cerca_max_min:
+li t0,0 
+
+add t1,a1,t0
+lb t2,(t1)
+mv a3,t2	#massimo
+mv a4,t2	#minimo
+addi t0,t0,4
+
+
+max_min_loop:
+beq t0,a2,exit1
+add t1,a1,t0
+lbu t2,(t1)
+bgt t2,a3,new_max
+blt t2,a4,new_min
+addi t0,t0,4
+b max_min_loop
+
+new_max:
+mv a3,t2
+addi t0,t0,4
+b max_min_loop
+
+new_min:
+mv a4,t2
+addi t0,t0,4
+b max_min_loop
+
+exit1:
+jr ra

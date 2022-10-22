@@ -1,0 +1,96 @@
+.data
+ msgin: .asciz "Inserisci un elemento dell' Array: "
+ msgout: .asciz "Ecco l'array ordinato: "
+ 
+.text
+.globl main
+
+main:
+
+addi sp,sp,-40	#spazio per 10 interi 
+
+mv a1,sp
+li a2,40
+jal input_array
+
+mv a1,sp
+li a2,40
+jal ordina_array
+
+la a0,msgout
+li a7,4
+ecall
+
+mv a1,sp
+li a2,40
+jal stampa_array
+
+li a7,10
+ecall
+
+
+input_array:
+li t0,0
+
+input_loop:
+beq t0,a2,exit
+add t1,a1,t0
+
+la a0,msgin
+li a7,4
+ecall
+
+li a7,5
+ecall
+
+sb a0,(t1)
+addi t0,t0,4
+b input_loop
+
+
+
+ordina_array:
+li t0,0
+li t1,4
+
+
+ordina_loop:
+beq t1,a2,exit
+add t2,a1,t0
+add t3,a1,t1
+lb t5,(t2)
+lb t6,(t3)
+bgt t5,t6,swap
+addi t0,t0,4
+addi t1,t1,4
+b ordina_loop
+
+swap:
+sb t5,(t3)
+sb t6,(t2)
+b ordina_array
+
+exit:
+jr ra
+
+stampa_array:
+li t0,0
+
+stampa_loop:
+beq t0,a2,exit
+
+add t1,a1,t0
+lb t2,(t1)
+mv a0,t2
+
+li a7,1
+ecall
+
+li a0,32
+li a7,11
+ecall
+
+addi t0,t0,4
+b stampa_loop
+
+

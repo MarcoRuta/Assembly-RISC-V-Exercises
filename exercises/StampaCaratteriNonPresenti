@@ -1,0 +1,73 @@
+.data
+msgin: .asciz "Inserisci un testo (massimo 200 caratteri): "
+msgout: .asciz "Ecco le lettere dell'alfabeto che non hai inserito: "
+text: .data 200
+
+.text
+.globl main
+
+main:
+la a0,msgin
+li a7,4
+ecall
+
+la a0,text
+li a1,200
+li a7,8
+ecall
+
+la a0,msgout
+li a7,4
+ecall
+
+la a1,text
+jal text_explorer
+
+
+
+li a7,10
+ecall
+
+text_explorer:
+li t0,65
+li t1,90
+li t2,'\n'
+
+loop:
+bgt t0,t1,exit
+li t3,0
+
+inner_loop:
+add t4,a1,t3
+lbu t5,(t4)
+
+beqz t5,print
+beq t5,t2,print
+
+beq t5,t0,found
+ori t6,t0,0x20
+beq t5,t6,found
+
+addi t3,t3,1
+b inner_loop
+
+found:
+addi t0,t0,1
+b loop
+
+print:
+mv a0,t0
+li a7,11
+ecall
+
+li a0,32
+li a7,11
+ecall
+
+addi t0,t0,1
+b loop
+
+exit:
+jr ra
+
+		

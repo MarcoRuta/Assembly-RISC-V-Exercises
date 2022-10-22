@@ -1,0 +1,121 @@
+
+.data
+###########################AREA DATI##############################
+msgin: .asciz "Inserisci una stringa (massimo 20 caratteri): "
+msgout: .asciz "Hai inserito "
+vocali: .asciz " vocali!"
+##################################################################
+.text
+###########################AREA TEXT##############################
+.globl main
+
+main:
+addi sp,sp,-100		#libero spazio per 100 byte
+
+mv a2,sp
+jal input		#salto alla funzione di input
+
+mv a2,sp
+jal conta_vocali
+
+la a0,msgout
+li a7,4
+ecall
+
+mv a0,a3
+li a7,1
+ecall			#stampa del numero di vocali, @return di conta_vocali
+
+la a0,vocali
+li a7,4
+ecall
+
+li a7,10
+ecall			#end of main
+
+#########################################################
+input:		#@parametri a2 Stack pointer
+li t0,0
+li t1,100
+
+input_loop:
+beq t0,t1,exit1
+
+la a0,msgin
+li a7,4
+ecall		#stampa messaggio di input
+
+add t2,a2,t0	#calcolo indirizzo dove salvare prossima stringa in area stack
+
+mv a0,t2
+li a1,20
+li a7,8
+ecall		#lettura stringa
+
+addi t0,t0,20
+b input_loop
+
+exit1:
+jr ra
+
+#########################################################
+conta_vocali:	#@parametri: a2 Stack pointer
+li a3,0		#@return: a3 numero di vocali trovate
+li t4,100
+li t6,0
+li t5,'\n'
+
+next_string:
+beq t6,t4,exit
+add t1,a2,t6
+
+
+conta_loop:
+lbu t2,(t1)	#carico il carattere t0-esimo
+
+beqz t2,next
+beq t2,t5,next	#se trovo terminatore o new line il testo è finito
+
+li t3,65	#Ascii A
+beq t2,t3,add_voc
+ori t3,t3,0x20	#Ascii a
+beq t2,t3,add_voc
+
+li t3,69	#Ascii E
+beq t2,t3,add_voc
+ori t3,t3,0x20	#Ascii e
+beq t2,t3,add_voc
+
+li t3,73	#Ascii I
+beq t2,t3,add_voc
+ori t3,t3,0x20	#Ascii i
+beq t2,t3,add_voc
+
+li t3,79	#Ascii O
+beq t2,t3,add_voc
+ori t3,t3,0x20	#Ascii o
+beq t2,t3,add_voc
+
+li t3,85	#Ascii U
+beq t2,t3,add_voc
+ori t3,t3,0x20	#Ascii u
+beq t2,t3,add_voc
+
+addi t1,t1,1	#mi sposto al carattere successivo
+b conta_loop
+
+add_voc:
+addi a3,a3,1	#incremento contatore vocali
+addi t1,t1,1	#mi sposto al carattere successivo
+b conta_loop
+
+next:
+addi t6,t6,20	#passo alla stringa successiva
+b next_string
+
+exit:
+jr ra
+
+#########################################################
+
+

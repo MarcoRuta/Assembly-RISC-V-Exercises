@@ -1,0 +1,86 @@
+.data
+msgin: .asciz "Inserisci un testo: (massimo 200 caratteri): "
+msgout1: .asciz "Carattere inserito con codice Ascii minore: "
+msgout2: .asciz "\nCarattere inserito con codice Ascii maggiore: "
+
+.text
+.globl main
+
+main:
+addi sp,sp,-200
+
+la a0,msgin
+li a7,4
+ecall
+
+mv a0,sp
+li a1,200
+li a7,8 
+ecall
+
+mv a1,sp
+jal cerca_max_min
+
+la a0,msgout1
+li a7,4
+ecall
+
+mv a0,a2
+li a7,11
+ecall
+
+la a0,msgout2
+li a7,4
+ecall
+
+mv a0,a3
+li a7,11
+ecall
+
+li a7,10
+ecall
+
+cerca_max_min:
+li t0,0
+li t1,'\n'
+li t5,64 #A
+
+add t2,a1,t0
+lbu t3,(t2)
+
+mv a2,t3 #più piccolo
+mv a3,t3 #più grande
+
+rotate:
+addi t0,t0,1
+
+cerca_loop:
+add t2,a1,t0
+lbu t3,(t2)
+
+beqz t3,exit
+beq t3,t1,exit
+blt t3,t5,rotate
+
+
+
+blt t3,a2,new_min
+bgt t3,a3,new_max
+
+
+addi t0,t0,1
+b cerca_loop
+
+new_min:
+mv a2,t3
+addi t0,t0,1
+b cerca_loop
+
+new_max:
+mv a3,t3
+addi t0,t0,1
+b cerca_loop
+
+exit:
+jr ra
+
